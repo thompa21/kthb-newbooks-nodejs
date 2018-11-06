@@ -13,7 +13,7 @@ function addZero(i) {
 }
 
 function addgooglecover(records,index) {
-	var thumbnail = "123123123"
+	var thumbnail = "";
 	thumbnail =	records[index].thumbnail;
 	var coverURL = "";
 	axios.get(thumbnail)
@@ -31,7 +31,7 @@ function addgooglecover(records,index) {
 			}
 			if(coverURL == "") {
 				//syndetics som backup om inte google har omslaget
-				coverURL = 'https://secure.syndetics.com/index.aspx?isbn=' + records[index].isbnprimo + '/lc.gif&client=primo&type=nocover&imagelinking=1';
+				coverURL = 'https://secure.syndetics.com/index.aspx?isbn=' + records[index].isbnprimo + '/lc.gif&client=primo&type=unbound&imagelinking=1';
 				sql = "UPDATE newbooks SET coverurl = '" + coverURL + "'" + 
 						" WHERE id = '" + records[index].id + "'";
 					con.query(sql)
@@ -94,6 +94,9 @@ function callprimoxservice(records,index) {
 					"' WHERE mmsid = '" + records[index].mmsid + "'";
 				con.query(sql)
 			} else {
+				fs.appendFile(appath + 'harvest.log', addZero(currentdate.getHours()) + ":" + addZero(currentdate.getMinutes()) + ":" + addZero(currentdate.getSeconds()) + "recordid saknas, mmsid: " + records[index].mmsid + "...\n", function (err) {
+					if (err) throw err;
+				});
 				console.log("recordid saknas, mmsid: " + records[index].mmsid);
 				console.log(JSON.stringify(response.data, null, 2));
 				console.log(endpoint);
