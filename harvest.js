@@ -222,7 +222,7 @@ function callalmaanalytics(endpoint,token){
 						if(IsFinished == 'false') {
 							callalmaanalytics(almaapiendpoint, token);
 						} else {
-							con.query("SELECT * FROM newbooks LIMIT 250", function (error, result, fields) {
+							con.query("SELECT * FROM newbooks ORDER BY activationdate DESC LIMIT 250", function (error, result, fields) {
 								if (error) {
 									currentdate = new Date();
 									fs.appendFile(appath + 'harvest.log', addZero(currentdate.getHours()) + ":" + addZero(currentdate.getMinutes()) + ":" + addZero(currentdate.getSeconds()) + " Harvest, Error selecting " + error + "\n", function (err) {
