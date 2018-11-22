@@ -140,7 +140,7 @@ function callprimoxservice(records,index) {
 		});
 }
 
-function callalmaanalytics(endpoint,token){
+function callalmaanalytics(endpoint, token, nrofprocessedrecords){
 	var IsFinished = 'false';
 	var booksarray = [];
 	var mmsid;
@@ -219,8 +219,10 @@ function callalmaanalytics(endpoint,token){
 							if (err) throw err;
 						});
 						console.log("inserted " + booksarray.length + " rows");
-						if(IsFinished == 'false') {
-							callalmaanalytics(almaapiendpoint, token);
+						nrofprocessedrecords = nrofprocessedrecords + 25;
+						//max 250 titlar
+						if(IsFinished == 'false' && nrofprocessedrecords < 250) {
+							callalmaanalytics(almaapiendpoint, token,nrofprocessedrecords);
 						} else {
 							con.query("SELECT * FROM newbooks ORDER BY activationdate DESC LIMIT 250", function (error, result, fields) {
 								if (error) {
@@ -284,7 +286,7 @@ process.argv.forEach(function (val, index, array) {
 
 var primoxserviceendpoint = "https://pmt-eu.hosted.exlibrisgroup.com/PrimoWebServices/xservice/search/brief";
 var almaapiendpoint = 'https://api-eu.hosted.exlibrisgroup.com/almaws/v1/analytics/reports?path=/shared/Royal Institute of Technology/Reports/new_ebooks&apikey=' + process.env.EXLIBRIS_APIKEY;
-almaapiendpoint = almaapiendpoint + '&filter=<sawx:expr xsi:type="sawx:comparison" op="greaterOrEqual" xmlns:saw="com.siebel.analytics.web/report/v1.1" xmlns:sawx="com.siebel.analytics.web/expression/v1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><sawx:expr xsi:type="sawx:sqlExpression">"E-Inventory"."Portfolio Activation Date"."Portfolio Activation Date"</sawx:expr><sawx:expr xsi:type="sawx:sqlExpression">TIMESTAMPADD(SQL_TSI_DAY, -' + days + ', CURRENT_DATE)</sawx:expr></sawx:expr>';
+almaapiendpoint = almaapiendpoint + '&filter=<sawx:expr xsi:type="sawx:comparison" op="greaterOrEqual" xmlns:saw="com.siebel.analytics.web/report/v1.1" xmlns:sawx="com.siebel.analytics.web/expression/v1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><sawx:expr xsi:type="sawx:sqlExpression">"E-Inventory"."Portfolio Activation Date"."Portfolio Activation Date"</sawx:expr><sawx:expr xsi:type="sawx:sqlExpression">TIMESTAMPADD(SQL_TSI_DAY, -' + days + ', CURRENT_DATE)</sawx:expr></sawx:expr>&limit=25';
 
 var parseString = require('xml2js').parseString;
 
@@ -316,4 +318,4 @@ fs.appendFile(appath + 'harvest.log', addZero(currentdate.getHours()) + ":" + ad
 	if (err) throw err;
 });
 
-callalmaanalytics(almaapiendpoint, '');
+callalmaanalytics(almaapiendpoint, '', 0);
