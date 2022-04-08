@@ -29,7 +29,7 @@ function addgooglecover(records,index) {
 			for (var key in googleresponse) {
 				if (typeof googleresponse[key].thumbnail_url != 'undefined'){
 					coverURL = googleresponse[key].thumbnail_url.replace("proxy-eu.hosted.exlibrisgroup.com/exl_rewrite/","");
-					sql = "UPDATE newbooks SET coverurl = '" + coverURL + "'" + 
+					sql = "UPDATE books SET coverurl = '" + coverURL + "'" + 
 						" WHERE id = '" + records[index].id + "'";
 					con.query(sql)
 				}
@@ -37,7 +37,7 @@ function addgooglecover(records,index) {
 			if(coverURL == "") {
 				//syndetics som backup om inte google har omslaget
 				coverURL = 'https://secure.syndetics.com/index.aspx?isbn=' + records[index].isbnprimo + '/lc.gif&client=primo&type=unbound&imagelinking=1';
-				sql = "UPDATE newbooks SET coverurl = '" + coverURL + "'" + 
+				sql = "UPDATE books SET coverurl = '" + coverURL + "'" + 
 						" WHERE id = '" + records[index].id + "'";
 					con.query(sql)
 			}
@@ -93,7 +93,7 @@ function callprimoxservice(records,index) {
 				if(typeof response.data.SEGMENTS.JAGROOT.RESULT.DOCSET.DOC.LINKS.thumbnail !== 'undefined') {
 					thumbnail = response.data.SEGMENTS.JAGROOT.RESULT.DOCSET.DOC.LINKS.thumbnail[1];
 				}
-				sql = "UPDATE newbooks SET recordid = '" + response.data.SEGMENTS.JAGROOT.RESULT.DOCSET.DOC.PrimoNMBib.record.control.recordid + 
+				sql = "UPDATE books SET recordid = '" + response.data.SEGMENTS.JAGROOT.RESULT.DOCSET.DOC.PrimoNMBib.record.control.recordid + 
 					"' ,isbnprimo = '" + isbnprimo + 
 					"' ,thumbnail = '" + thumbnail + 
 					"' WHERE mmsid = '" + records[index].mmsid + "'";
@@ -123,7 +123,7 @@ function callprimoxservice(records,index) {
 					if (err) throw err;
 				});
 				console.log("primox finished");
-				con.query("SELECT * FROM newbooks where thumbnail != '' AND thumbnail != 'no_cover' and thumbnail != 'o'", function (error, result, fields) {
+				con.query("SELECT * FROM books where thumbnail != '' AND thumbnail != 'no_cover' and thumbnail != 'o'", function (error, result, fields) {
 					if (error) {
 						currentdate = new Date();
 						fs.appendFile(appath + 'harvest.log', addZero(currentdate.getHours()) + ":" + addZero(currentdate.getMinutes()) + ":" + addZero(currentdate.getSeconds()) + " Harvest, error selecting " + error + "\n", function (err) {
@@ -216,7 +216,7 @@ function callalmaanalytics(endpoint, token, nrofprocessedrecords){
 							//samla alla inserts i array och gör bara ett anrop efter iterationen är färdig.
 							booksarray.push([mmsid, '', isbn, title, activationdate, publicationdate, dewey, subject, category, subcategory]);
 						}
-						sql = "INSERT INTO newbooks(mmsid, recordid, isbn, title, activationdate, publicationdate, dewey, subject, category, subcategory) VALUES ?";
+						sql = "INSERT INTO books(mmsid, recordid, isbn, title, activationdate, publicationdate, dewey, subject, category, subcategory) VALUES ?";
 						con.query(sql, [booksarray]);
 						currentdate = new Date();
 						fs.appendFile(appath + 'harvest.log', addZero(currentdate.getHours()) + ":" + addZero(currentdate.getMinutes()) + ":" + addZero(currentdate.getSeconds()) + " Harvest, Inserted " + booksarray.length + " rows \n", function (err) {
@@ -228,7 +228,7 @@ function callalmaanalytics(endpoint, token, nrofprocessedrecords){
 						if(IsFinished == 'false' && nrofprocessedrecords < 250) {
 							callalmaanalytics(almaapiendpoint, token,nrofprocessedrecords);
 						} else {
-							con.query("SELECT * FROM newbooks ORDER BY activationdate DESC LIMIT 250", function (error, result, fields) {
+							con.query("SELECT * FROM books ORDER BY activationdate DESC LIMIT 250", function (error, result, fields) {
 								if (error) {
 									currentdate = new Date();
 									fs.appendFile(appath + 'harvest.log', addZero(currentdate.getHours()) + ":" + addZero(currentdate.getMinutes()) + ":" + addZero(currentdate.getSeconds()) + " Harvest, Error selecting " + error + "\n", function (err) {
@@ -295,11 +295,11 @@ almaapiendpoint = almaapiendpoint + '&filter=<sawx:expr xsi:type="sawx:compariso
 var parseString = require('xml2js').parseString;
 
 var fs = require('fs');
-var appath = "/home/administrator/newbooks/";
+var appath = "./";
 
 //Start transaction!
 con.beginTransaction();
-sql = "DELETE FROM newbooks";
+sql = "DELETE FROM books";
 
 con.query(sql, function (err, result) {
 	if (err) { 
