@@ -162,8 +162,6 @@ function callalmaanalytics(endpoint, token, nrofprocessedrecords){
         	data += chunk;
 	});
 
-});
-
 	resp.on('end', () => {
         	parseString(data, function (err, result) {
 				if (typeof result.report.QueryResult !== 'undefined') {
