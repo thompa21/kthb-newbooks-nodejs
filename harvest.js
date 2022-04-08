@@ -162,6 +162,8 @@ function callalmaanalytics(endpoint, token, nrofprocessedrecords){
         	data += chunk;
 	});
 
+});
+
 	resp.on('end', () => {
         	parseString(data, function (err, result) {
 				if (typeof result.report.QueryResult !== 'undefined') {
@@ -173,6 +175,7 @@ function callalmaanalytics(endpoint, token, nrofprocessedrecords){
 					subject = '';
 					category = '';
 					subcategory = '';
+					publicationdate = '';
 					IsFinished = result.report.QueryResult[0].IsFinished[0];
 					if(typeof result.report.QueryResult[0].ResumptionToken !== 'undefined') {
 						token = result.report.QueryResult[0].ResumptionToken[0];
@@ -190,6 +193,9 @@ function callalmaanalytics(endpoint, token, nrofprocessedrecords){
 							}
 							if (typeof result.report.QueryResult[0].ResultXml[0].rowset[0].Row[index].Column10!== 'undefined') {
 								activationdate = result.report.QueryResult[0].ResultXml[0].rowset[0].Row[index].Column10[0];
+							}
+							if (typeof result.report.QueryResult[0].ResultXml[0].rowset[0].Row[index].Column11!== 'undefined') {
+								publicationdate = result.report.QueryResult[0].ResultXml[0].rowset[0].Row[index].Column11[0];
 							}
 							if (typeof result.report.QueryResult[0].ResultXml[0].rowset[0].Row[index].Column3 !== 'undefined') {
 								dewey = result.report.QueryResult[0].ResultXml[0].rowset[0].Row[index].Column3[0];
@@ -210,9 +216,9 @@ function callalmaanalytics(endpoint, token, nrofprocessedrecords){
 								}
 							}
 							//samla alla inserts i array och gör bara ett anrop efter iterationen är färdig.
-							booksarray.push([mmsid,'',isbn,title,activationdate,dewey,subject,category,subcategory]);
+							booksarray.push([mmsid, '', isbn, title, activationdate, publicationdate, dewey, subject, category, subcategory]);
 						}
-						sql = "INSERT INTO newbooks(mmsid, recordid, isbn, title, activationdate, dewey, subject, category, subcategory) VALUES ?";
+						sql = "INSERT INTO newbooks(mmsid, recordid, isbn, title, activationdate, publicationdate, dewey, subject, category, subcategory) VALUES ?";
 						con.query(sql, [booksarray]);
 						currentdate = new Date();
 						fs.appendFile(appath + 'harvest.log', addZero(currentdate.getHours()) + ":" + addZero(currentdate.getMinutes()) + ":" + addZero(currentdate.getSeconds()) + " Harvest, Inserted " + booksarray.length + " rows \n", function (err) {
