@@ -8,7 +8,7 @@ const axios = require('axios');
 
 var mysql = require('mysql')
 
-require('dotenv').config({path:'/home/administrator/newbooks/.env'});
+require('dotenv').config();
 
 function addZero(i) {
     if (i < 10) {
