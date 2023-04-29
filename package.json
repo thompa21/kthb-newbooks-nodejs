@@ -4,7 +4,7 @@
   "description": "",
   "main": "harvest.js",
   "dependencies": {
-    "axios": "^0.18.1",
+    "axios": "^0.21.2",
     "dotenv": "^6.1.0",
     "mysql": "^2.16.0",
     "xml2js": "^0.4.19"
